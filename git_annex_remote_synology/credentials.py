@@ -77,7 +77,7 @@ class Credentials:
         self._totp_command = totp_command
 
     @property
-    def totp(self) -> str | None:
+    def totp(self) -> str:
         totp = None
         if self.totp_command:
             totp_result: CompletedProcess = run(
@@ -108,12 +108,12 @@ class Credentials:
     def _create_users_table(self):
         self._cursor.execute(
             """CREATE TABLE IF NOT EXISTS Users
-               (hostname text, username text, totp_command text)
+               (hostname TEXT NOT NULL UNIQUE, username TEXT NOT NULL, totp_command TEXT)
             """
         )
         self._connection.commit()
 
-    def _get_password(self) -> str | None:
+    def _get_password(self) -> str:
         password = getenv(PASSWORD_ENV_NAME)
 
         if password:
@@ -123,34 +123,30 @@ class Credentials:
 
         return password
 
-    def _get_username(self) -> str | None:
+    def _get_username(self) -> str:
         username = getenv(USERNAME_ENV_NAME)
 
         if username:
             self.username = username
         else:
-            username = (
-                self._cursor.execute(
-                    "SELECT username FROM users WHERE hostname = ?", (self.hostname,)
-                )[0]
-                or None
-            )
+            result = self._cursor.execute(
+                "SELECT username FROM users WHERE hostname = ?", (self.hostname,)
+            ).fetchone()
+            username = result[0] if result else None
 
         return username
 
-    def _get_totp_command(self) -> str | None:
+    def _get_totp_command(self) -> str:
         totp_command = getenv(TOTP_COMMAND_ENV_NAME)
 
         if totp_command:
             self.totp_command = totp_command
         else:
-            totp_command = (
-                self._cursor.execute(
-                    "SELECT totp_command FROM users WHERE hostname = ?",
-                    (self.hostname,),
-                )[0]
-                or None
-            )
+            result = self._cursor.execute(
+                "SELECT totp_command FROM users WHERE hostname = ?",
+                (self.hostname,),
+            ).fetchone()
+            totp_command = result[0] if result else None
 
         return totp_command
 
@@ -171,7 +167,7 @@ class Credentials:
     def _save_password(self, password: str):
         keyring.set_password(self.service_id, self.username, password)
 
-    def _save_username(self, username: str, totp_command: str | None):
+    def _save_username(self, username: str, totp_command: str):
         self._cursor.execute(
             """INSERT INTO Users (hostname, username, totp_command)
                VALUES (?, ?, ?)
@@ -179,3 +175,5 @@ class Credentials:
                UPDATE SET username=excluded.username, totp_command=excluded.totp_command;""",
             (self.hostname, username, totp_command or ""),
         )
+
+        self._connection.commit()

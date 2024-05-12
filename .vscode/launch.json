@@ -5,10 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Init",
+            "name": "Setup",
             "type": "debugpy",
             "request": "launch",
             "module": "git_annex_remote_synology",
+            "args": [
+                "setup",
+                "--hostname",
+                "e4e-nas.ucsd.edu"
+            ]
         }
     ]
 }
