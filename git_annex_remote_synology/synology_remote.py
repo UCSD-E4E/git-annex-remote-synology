@@ -110,7 +110,7 @@ class SynologyRemote(SpecialRemote):
     def _authenticate(self):
         if self._filestation is None:
             try:
-                with Credentials(self.hostname) as creds:
+                with Credentials(self.hostname, headless=True) as creds:
                     filestation = FileStation(
                         self.hostname,
                         self.port,

@@ -7,6 +7,7 @@ from subprocess import PIPE, CompletedProcess, run
 
 import backoff
 import keyring
+from annexremote import RemoteError
 from appdirs import user_config_dir
 
 SERVICE_ID_SUFFIX = "git-annex-remote-synology"
@@ -16,8 +17,9 @@ TOTP_COMMAND_ENV_NAME = "NAS_TOTP_COMMAND"
 
 
 class Credentials:
-    def __init__(self, hostname: str) -> None:
+    def __init__(self, hostname: str, headless=False) -> None:
         self._hostname = hostname
+        self._headless = headless
 
         self._username: str = None
         self._totp_command: str = None
@@ -159,9 +161,15 @@ class Credentials:
         return config_dir
 
     def _prompt_password(self) -> str:
+        if self._headless:
+            raise RemoteError("Password has not been stored.  Please rerun setup.")
+
         return getpass()
 
     def _prompt_username(self) -> str:
+        if self._headless:
+            raise RemoteError("User name has not been stored.  Please rerun setup.")
+
         return input("User Name: ")
 
     def _save_password(self, password: str):
