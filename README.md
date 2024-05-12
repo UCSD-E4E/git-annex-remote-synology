@@ -5,6 +5,11 @@
 pipx install git+https://github.com/UCSD-E4E/git-annex-remote-synology.git
 ```
 
+## Upgrade
+```
+pipx upgrade git-annex-remote-synology
+```
+
 ## Usage
 1. Create a git-annex repository (walkthrough)
 2. Execute `git-annex-remote-synology setup --hostname e4e-nas.ucsd.edu` to ensure that your username and password are stored.

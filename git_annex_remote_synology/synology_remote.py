@@ -122,13 +122,13 @@ class SynologyRemote(SpecialRemote):
                         debug=self._debug,
                         otp_code=creds.totp,
                     )
-            except FileStationError:
+            except:
                 raise RemoteError(
                     f"Authentication to {self.hostname}:{self.port} failed."
                 )
 
             self._filestation = filestation
-            self._nas = NAS(filestation)
+            self._nas = NAS(self._filestation)
 
     def initremote(self):
         self._authenticate()
