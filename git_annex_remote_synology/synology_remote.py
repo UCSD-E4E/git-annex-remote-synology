@@ -3,7 +3,6 @@ from tempfile import TemporaryDirectory
 from typing import Callable
 
 from annexremote import Master, RemoteError, SpecialRemote
-from synology_api.exceptions import FileStationError
 from synology_api.filestation import FileStation
 
 from git_annex_remote_synology.credentials import Credentials
@@ -122,12 +121,13 @@ class SynologyRemote(SpecialRemote):
                         debug=self._debug,
                         otp_code=creds.totp,
                     )
+
+                    self._filestation = filestation
             except:
                 raise RemoteError(
                     f"Authentication to {self.hostname}:{self.port} failed."
                 )
 
-            self._filestation = filestation
             self._nas = NAS(self._filestation)
 
     def initremote(self):
