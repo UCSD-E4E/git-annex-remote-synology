@@ -15,5 +15,5 @@ pipx upgrade git-annex-remote-synology
 2. Execute `git-annex-remote-synology setup --hostname e4e-nas.ucsd.edu` to ensure that your username and password are stored.
 3. Perform the `initremote`
 ```
-git annex initremote synology type=external externaltype=synology encryption=none hostname=e4e-nas.ucsd.edu port=6021 protocol=https ignore_ssl=True dsm_version=7 --path /fishsense/git-annex/pyFishSenseDev
+git annex initremote synology type=external externaltype=synology encryption=none hostname=e4e-nas.ucsd.edu port=6021 protocol=https ignore_ssl=True dsm_version=7 path=/fishsense/git-annex/pyFishSenseDev
 ```
