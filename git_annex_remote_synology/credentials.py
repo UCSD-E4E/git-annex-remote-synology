@@ -19,7 +19,7 @@ TOTP_COMMAND_ENV_NAME = "NAS_TOTP_COMMAND"
 
 class Credentials:
     def __init__(self, hostname: str, headless=False) -> None:
-        logging.info("Test")
+        logging.debug("Test")
 
         self._hostname = hostname
         self._headless = headless
