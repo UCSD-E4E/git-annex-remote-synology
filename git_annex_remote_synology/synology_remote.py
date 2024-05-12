@@ -109,7 +109,10 @@ class SynologyRemote(SpecialRemote):
     def _authenticate(self):
         if self._filestation is None:
             try:
-                with Credentials(self.hostname, headless=True) as creds:
+                self.annex.debug("Starting auth process.")
+                with Credentials(
+                    self.hostname, headless=True, annex=self.annex
+                ) as creds:
                     filestation = FileStation(
                         self.hostname,
                         self.port,
@@ -123,12 +126,13 @@ class SynologyRemote(SpecialRemote):
                     )
 
                     self._filestation = filestation
-            except:
+            except Exception as ex:
+                self.annex.debug(f'Exception "{ex}" occurred while trying to auth.')
                 raise RemoteError(
                     f"Authentication to {self.hostname}:{self.port} failed."
                 )
 
-            self._nas = NAS(self._filestation)
+            self._nas = NAS(self._filestation, self.annex)
 
     def initremote(self):
         self._authenticate()

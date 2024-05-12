@@ -7,7 +7,7 @@ from subprocess import PIPE, CompletedProcess, run
 
 import backoff
 import keyring
-from annexremote import RemoteError
+from annexremote import Master, RemoteError
 from appdirs import user_config_dir
 
 SERVICE_ID_SUFFIX = "git-annex-remote-synology"
@@ -17,15 +17,18 @@ TOTP_COMMAND_ENV_NAME = "NAS_TOTP_COMMAND"
 
 
 class Credentials:
-    def __init__(self, hostname: str, headless=False) -> None:
+    def __init__(self, hostname: str, headless=False, annex: Master = None) -> None:
         self._hostname = hostname
         self._headless = headless
+        self._annex = annex
 
         self._username: str = None
         self._totp_command: str = None
 
         self._connection: Connection = None
         self._cursor: Cursor = None
+
+        self._debug("End of Credentials init.")
 
     @property
     def hostname(self) -> str:
@@ -39,6 +42,7 @@ class Credentials:
             username = self._prompt_username()
             self.username = username
 
+        self._debug(f'Successfully returned username "{username}".')
         return username
 
     @username.setter
@@ -105,6 +109,10 @@ class Credentials:
         self._connection.close()
 
         return True
+
+    def _debug(self, statement: str):
+        if self._annex:
+            self._annex.debug(statement)
 
     @backoff.on_exception(backoff.expo, OperationalError)
     def _create_users_table(self):

@@ -1,4 +1,3 @@
-import logging
 import sys
 from argparse import ArgumentParser
 
@@ -41,10 +40,6 @@ def main() -> None:
 
     master = Master()
     master.LinkRemote(SynologyRemote(master))
-
-    logger = logging.getLogger()
-    logger.addHandler(master.LoggingHandler())
-
     master.Listen()
 
 

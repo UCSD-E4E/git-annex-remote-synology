@@ -5,6 +5,7 @@ A wrapper around the synology API for to help with NAS access.
 from os import makedirs
 from typing import Tuple
 
+from annexremote import Master
 from synology_api.filestation import FileStation
 from tqdm import tqdm
 
@@ -14,8 +15,12 @@ class NAS:
     A wrapper around the synology API for to help with NAS access.
     """
 
-    def __init__(self, filestation: FileStation):
+    def __init__(self, filestation: FileStation, annex: Master):
+        if filestation is None:
+            annex.debug("Filestation is None in NAS class.")
+
         self.filestation = filestation
+        self.annex = annex
 
     def list_structure(self, path: str, recursive=False):
         """
@@ -25,16 +30,43 @@ class NAS:
         if not self.exists(path):
             return []
 
-        files_and_dirs = self.filestation.get_file_list(path)["data"]["files"]
-        dirs = [fd["path"] for fd in files_and_dirs if fd["isdir"]]
+        if path == "/" or path == "":
+            self.annex.debug("Root.  Checking for shares.")
+            result = self.filestation.get_list_share()
 
-        structure = [f["path"] for f in files_and_dirs]
+            self.annex.debug(f'Received "{result}" from server.')
+            if "success" in result and result["success"]:
+                structure = [f["path"] for f in result["data"]["shares"]]
 
-        if recursive:
-            for directory in dirs:
-                structure.extend(self.list_structure(directory, recursive=recursive))
+                if recursive:
+                    for directory in dirs:
+                        structure.extend(
+                            self.list_structure(directory, recursive=recursive)
+                        )
 
-        return structure
+                self.annex.debug(f'Found shares "{structure}".')
+                return structure
+            else:
+                self.annex.debug("Could not find any shares.")
+                return []
+
+        result = self.filestation.get_file_list(path)
+
+        if "success" in result and result["success"]:
+            files_and_dirs = result["data"]["files"]
+            dirs = [fd["path"] for fd in files_and_dirs if fd["isdir"]]
+
+            structure = [f["path"] for f in files_and_dirs]
+
+            if recursive:
+                for directory in dirs:
+                    structure.extend(
+                        self.list_structure(directory, recursive=recursive)
+                    )
+
+            return structure
+        else:
+            return []
 
     def find_leaf_nodes(self, path: str):
         """
@@ -80,20 +112,28 @@ class NAS:
         """
         Checks to see if the given directory exists.
         """
+        self.annex.debug(f'Checking "{path}".')
+
+        if path == "/" or path == "":
+            return True
 
         try:
             parent = "/".join(path.split("/")[:-1])
-            result = self.filestation.get_file_list(parent)
+            structure = self.list_structure(parent)
 
-            if "success" not in result or not result["success"]:
+            if len(structure) == 0:
+                self.annex.debug("Synology returned no elements.")
                 return False
 
-            return any(f for f in result["data"]["files"] if f["path"] == path)
-        except:
+            return any(f for f in structure if f == path)
+        except Exception as ex:
+            self.annex.debug(f'Exception "{ex}" occurred.  Does not exist.')
             return False
 
     def create_folder(self, path: str):
         """Creates a new folder on the NAS.  Returns True for success and False for failure."""
+
+        self.annex.debug(f'Creating folder at "{path}".')
 
         if self.exists(path):
             return True
@@ -102,6 +142,11 @@ class NAS:
         folder = path.split("/")[-1]
         if not self.create_folder(parent):
             return False
+
+        self.annex.debug(
+            f'Performing create folder with parent: "{parent}", folder: "{folder}"'
+        )
+        return
 
         result = self.filestation.create_folder(parent, folder)
 
