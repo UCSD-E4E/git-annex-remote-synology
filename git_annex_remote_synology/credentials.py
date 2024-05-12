@@ -1,3 +1,4 @@
+import logging
 import shlex
 from getpass import getpass
 from os import getenv, makedirs
@@ -18,6 +19,8 @@ TOTP_COMMAND_ENV_NAME = "NAS_TOTP_COMMAND"
 
 class Credentials:
     def __init__(self, hostname: str, headless=False) -> None:
+        logging.info("Test")
+
         self._hostname = hostname
         self._headless = headless
 
