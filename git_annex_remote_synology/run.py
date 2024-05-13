@@ -2,15 +2,19 @@ import sys
 from argparse import ArgumentParser
 
 from annexremote import Master
+from synology_api.filestation import FileStation
 
 from git_annex_remote_synology.credentials import Credentials
 from git_annex_remote_synology.synology_remote import SynologyRemote
 
 
-def setup(hostname: str) -> None:
-    with Credentials(hostname) as credentials:
-        username = credentials.username
-        password = credentials.password
+def setup(hostname: str, clear_password) -> None:
+    with Credentials(hostname) as creds:
+        if clear_password:
+            creds.delete_password()
+
+        username = creds.username
+        password = creds.password
 
         if username and password:
             print(f"We found a password for {username}.")
@@ -34,10 +38,15 @@ def main() -> None:
             help="The hostname of your Synology NAS.",
             required=True,
         )
+        parser_setup.add_argument(
+            "--clear-password",
+            action="store_true",
+            help="Clears the password from the password store.",
+        )
 
         args = parser.parse_args()
         if args.subcommand == "setup":
-            setup(args.hostname)
+            setup(args.hostname, args.clear_password)
             return
 
     master = Master()

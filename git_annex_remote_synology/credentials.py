@@ -50,8 +50,7 @@ class Credentials:
 
     @username.setter
     def username(self, username: str):
-        if self._get_username() != username:
-            self._save_username(username, self.totp_command)
+        self._save_username(username, self.totp_command)
 
         self._username = username
 
@@ -76,8 +75,7 @@ class Credentials:
 
     @password.setter
     def password(self, password: str):
-        if self._get_password() != password:
-            self._save_password(password)
+        self._save_password(password)
 
     @property
     def service_id(self) -> str:
@@ -86,14 +84,13 @@ class Credentials:
     @property
     def totp_command(self) -> str:
         totp_command = self._get_totp_command()
-        self._annex.debug(f'TOTP Command: "{totp_command}".')
+        self._debug(f'TOTP Command in Property: "{totp_command}".')
 
         return totp_command
 
     @totp_command.setter
     def totp_command(self, totp_command: str):
-        if self._get_totp_command() != totp_command:
-            self._save_username(self.username, totp_command)
+        self._save_username(self.username, totp_command)
 
         self._totp_command = totp_command
 
@@ -106,7 +103,7 @@ class Credentials:
             )
             totp = totp_result.stdout.decode("utf8")
 
-        self._annex.debug(f"TOTP: {totp}")
+        self._debug(f"TOTP: {totp}")
 
         return totp
 
@@ -165,6 +162,7 @@ class Credentials:
 
     def _get_totp_command(self) -> str:
         totp_command = getenv(TOTP_COMMAND_ENV_NAME)
+        self._debug(f"TOTP Command: {totp_command}")
 
         if totp_command:
             self.totp_command = totp_command
@@ -210,3 +208,6 @@ class Credentials:
         )
 
         self._connection.commit()
+
+    def delete_password(self):
+        keyring.delete_password(self.service_id, self.username)

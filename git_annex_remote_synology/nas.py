@@ -64,6 +64,7 @@ class NAS:
                         self.list_structure(directory, recursive=recursive)
                     )
 
+            self.annex.debug(f'Found structure: "{structure}".')
             return structure
         else:
             return []
@@ -146,8 +147,6 @@ class NAS:
         self.annex.debug(
             f'Performing create folder with parent: "{parent}", folder: "{folder}"'
         )
-        return
-
         result = self.filestation.create_folder(parent, folder)
 
         return "success" in result and result["success"]

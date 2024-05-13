@@ -10,6 +10,8 @@ from git_annex_remote_synology.nas import NAS
 
 
 class SynologyRemote(SpecialRemote):
+    counter = 0
+
     def __init__(self, annex: Master, debug=False) -> None:
         super().__init__(annex)
 
@@ -121,9 +123,11 @@ class SynologyRemote(SpecialRemote):
                             f'Found username: "{creds.username}" and password.'
                         )
 
-                    self.annex.debug(f'TOTP Command: "{creds.totp_command}".')
+                    self.annex.debug(
+                        f"hostname: {self.hostname}, port: {self.port}, secure: {self.protocol == 'https'}, cert_verify: {not self.ignore_ssl}, dsm_version: {self.dsm_version}"
+                    )
 
-                    filestation = FileStation(
+                    self._filestation = FileStation(
                         self.hostname,
                         self.port,
                         creds.username,
@@ -135,7 +139,7 @@ class SynologyRemote(SpecialRemote):
                         otp_code=creds.totp,
                     )
 
-                    self._filestation = filestation
+                    self.annex.debug("Finished FileStation init.")
             except Exception as ex:
                 self.annex.debug(f'Exception "{ex}" occurred while trying to auth.')
 
@@ -154,25 +158,28 @@ class SynologyRemote(SpecialRemote):
         if not self._nas.create_folder(self.path):
             raise RemoteError(f"Could not create path '{self.path}'.")
 
-    def transfer_store(self, key, local_file):
+    def transfer_store(self, key: str, local_file: str):
+        self.annex.debug(f"Counter: {SynologyRemote.counter}")
+        SynologyRemote.counter += 1
+
         self._authenticate()
 
-        local_path = Path(local_file)
-        with TemporaryDirectory() as target_dir:
-            local_target = Path(target_dir) / key
+        self.annex.debug(f'Attempting to store "{local_file}" to "{key}".')
 
-            local_path.symlink_to(local_target)
-            self._nas.upload_file(self.path, local_target)
+        local_path = Path(local_path)
+
+        target_parent = f"{self.path}/{key}"
+        self._nas.create_folder(target_parent)
+        self._nas.upload_file(f"{target_parent}/{local_path.name}", local_file)
 
     def transfer_retrieve(self, key: str, local_file: str):
         self._authenticate()
 
-        local_path = Path(local_file)
-        with TemporaryDirectory() as target_dir:
-            local_target = Path(target_dir) / key
+        self.annex.debug(f'Attempting to retrieve "{key}" and store at "{local_file}".')
 
-            self._nas.download_file(f"{self.path}/{key}", target_dir)
-            local_target.rename(local_path)
+        local_path = Path(local_path)
+        target_parent = f"{self.path}/{key}"
+        self._nas.download_file(f"{target_parent}/{local_path.name}", local_file)
 
     def checkpresent(self, key):
         self._authenticate()

@@ -12,7 +12,8 @@
             "args": [
                 "setup",
                 "--hostname",
-                "e4e-nas.ucsd.edu"
+                "e4e-nas.ucsd.edu",
+                //"--clear-password"
             ]
         }
     ]
