@@ -166,8 +166,7 @@ class SynologyRemote(SpecialRemote):
 
         self.annex.debug(f'Attempting to store "{local_file}" to "{key}".')
 
-        local_path = Path(local_path)
-
+        local_path = Path(local_file)
         target_parent = f"{self.path}/{key}"
         self._nas.create_folder(target_parent)
         self._nas.upload_file(f"{target_parent}/{local_path.name}", local_file)
@@ -177,7 +176,7 @@ class SynologyRemote(SpecialRemote):
 
         self.annex.debug(f'Attempting to retrieve "{key}" and store at "{local_file}".')
 
-        local_path = Path(local_path)
+        local_path = Path(local_file)
         target_parent = f"{self.path}/{key}"
         self._nas.download_file(f"{target_parent}/{local_path.name}", local_file)
 
