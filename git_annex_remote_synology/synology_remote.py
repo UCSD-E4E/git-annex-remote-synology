@@ -166,10 +166,9 @@ class SynologyRemote(SpecialRemote):
 
         self.annex.debug(f'Attempting to store "{local_file}" to "{key}".')
 
-        local_path = Path(local_file)
         target_parent = f"{self.path}/{key}"
         self._nas.create_folder(target_parent)
-        self._nas.upload_file(f"{target_parent}/{local_path.name}", local_file)
+        self._nas.upload_file(target_parent, local_file)
 
     def transfer_retrieve(self, key: str, local_file: str):
         self._authenticate()
@@ -178,7 +177,9 @@ class SynologyRemote(SpecialRemote):
 
         local_path = Path(local_file)
         target_parent = f"{self.path}/{key}"
-        self._nas.download_file(f"{target_parent}/{local_path.name}", local_file)
+        self._nas.download_file(
+            f"{target_parent}/{local_path.name}", local_path.parent.as_posix()
+        )
 
     def checkpresent(self, key):
         self._authenticate()
