@@ -30,7 +30,7 @@ class NAS:
         if not self.exists(path):
             return []
 
-        if path == "/" or path == "":
+        if path in ("/", ""):
             self.annex.debug("Root.  Checking for shares.")
             result = self.filestation.get_list_share()
 
@@ -39,16 +39,17 @@ class NAS:
                 structure = [f["path"] for f in result["data"]["shares"]]
 
                 if recursive:
-                    for directory in dirs:
+                    for directory in structure:
                         structure.extend(
                             self.list_structure(directory, recursive=recursive)
                         )
 
                 self.annex.debug(f'Found shares "{structure}".')
-                return structure
             else:
                 self.annex.debug("Could not find any shares.")
-                return []
+                structure = []
+
+            return structure
 
         result = self.filestation.get_file_list(path)
 
@@ -65,9 +66,10 @@ class NAS:
                     )
 
             self.annex.debug(f'Found structure: "{structure}".')
-            return structure
         else:
-            return []
+            structure = []
+
+        return structure
 
     def find_leaf_nodes(self, path: str):
         """
@@ -115,7 +117,7 @@ class NAS:
         """
         self.annex.debug(f'Checking "{path}".')
 
-        if path == "/" or path == "":
+        if path in ("/", ""):
             return True
 
         try:
@@ -127,7 +129,8 @@ class NAS:
                 return False
 
             return any(f for f in structure if f == path)
-        except Exception as ex:
+        # Disabling for this catch because this throws a generic exception.
+        except Exception as ex:  # pylint: disable=broad-exception-caught
             self.annex.debug(f'Exception "{ex}" occurred.  Does not exist.')
             return False
 
@@ -165,8 +168,11 @@ class NAS:
         return "success" in result and result["success"]
 
     def upload_file(self, synology_folder: str, local_file: str):
-        """
-        Uploads the given folder to the NAS.
+        """Uploads the given file to the NAS.
+
+        Args:
+            synology_folder (str): The target directory on the Synology NAS to upload the file to.
+            local_file (str): The local path of the file to upload.
         """
 
         self.filestation.upload_file(synology_folder, local_file)

@@ -1,3 +1,7 @@
+"""A module containing an object representing credentials used for access a Synology NAS.
+Returns username, password, and TOTP.
+"""
+
 import shlex
 from getpass import getpass
 from os import getenv, makedirs
@@ -16,7 +20,12 @@ PASSWORD_ENV_NAME = "NAS_PASSWORD"
 TOTP_COMMAND_ENV_NAME = "NAS_TOTP_COMMAND"
 
 
-class Credentials:
+# These instance attributes are important.
+class Credentials:  # pylint: disable=too-many-instance-attributes
+    """An object representing credentials used for access a Synology NAS.
+    Returns username, password, and TOTP.
+    """
+
     def __init__(self, hostname: str, headless=False, annex: Master = None) -> None:
         self._hostname = hostname
         self._headless = headless
@@ -30,10 +39,23 @@ class Credentials:
 
     @property
     def hostname(self) -> str:
+        """The hostname associated with this credential.
+
+        Returns:
+            str: The hostname associated with this credential.
+        """
         return self._hostname
 
     @property
     def username(self) -> str:
+        """The password associated with this credential.
+
+        Raises:
+            RemoteError: Raised if the username returned is None.
+
+        Returns:
+            str: The password associated with this credential.
+        """
         username = self._get_username()
 
         if not username:
@@ -43,7 +65,7 @@ class Credentials:
         if username:
             self._debug(f'Successfully returned username "{username}".')
         else:
-            self._debug(f"Username was not returned successfully.")
+            self._debug("Username was not returned successfully.")
             raise RemoteError("Username cannot be null.")
 
         return username
@@ -56,6 +78,15 @@ class Credentials:
 
     @property
     def password(self) -> str:
+        """The password associated with this credential.  This is always collected from the password
+        store.
+
+        Raises:
+            RemoteError: Raised if the password returned by the password store is None.
+
+        Returns:
+            str: password associated with this credential.
+        """
         self._debug("Starting get password.")
         password = self._get_password()
         self._debug("Finished get password.")
@@ -79,10 +110,20 @@ class Credentials:
 
     @property
     def service_id(self) -> str:
+        """The service ID that uniquely identifies this credential.
+
+        Returns:
+            str: The service ID that uniquely identifies this credential.
+        """
         return f"{self.hostname}-{SERVICE_ID_SUFFIX}"
 
     @property
     def totp_command(self) -> str:
+        """The command for getting the TOTP needed to login.
+
+        Returns:
+            str: The command to get the TOTP needed to login.
+        """
         totp_command = self._get_totp_command()
         self._debug(f'TOTP Command in Property: "{totp_command}".')
 
@@ -96,10 +137,15 @@ class Credentials:
 
     @property
     def totp(self) -> str:
+        """Executes the command specified in self.totp_command and returns the result.
+
+        Returns:
+            str: The result from running the command stored in self.totp_command.
+        """
         totp = None
         if self.totp_command:
             totp_result: CompletedProcess = run(
-                shlex.split(self.totp_command), stdout=PIPE
+                shlex.split(self.totp_command), stdout=PIPE, check=True
             )
             totp = totp_result.stdout.decode("utf8")
 
@@ -210,4 +256,5 @@ class Credentials:
         self._connection.commit()
 
     def delete_password(self):
+        """Deletes the password associated with this credential from the password store."""
         keyring.delete_password(self.service_id, self.username)

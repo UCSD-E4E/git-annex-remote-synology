@@ -1,14 +1,23 @@
+"""Entry point for the CLI setup in Poetry.
+"""
+
 import sys
 from argparse import ArgumentParser
 
 from annexremote import Master
-from synology_api.filestation import FileStation
 
 from git_annex_remote_synology.credentials import Credentials
 from git_annex_remote_synology.synology_remote import SynologyRemote
 
 
-def setup(hostname: str, clear_password) -> None:
+def setup(hostname: str, clear_password: bool) -> None:
+    """Sets up the username and password store for the hostname.  Clears the password first if
+    clear_password is set.
+
+    Args:
+        hostname (str): The hostname to associate the username/password with.
+        clear_password (bool): Deletes the password from the password store.
+    """
     with Credentials(hostname) as creds:
         if clear_password:
             creds.delete_password()
