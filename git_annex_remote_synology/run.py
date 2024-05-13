@@ -13,7 +13,9 @@ def setup(hostname: str) -> None:
         password = credentials.password
 
         if username and password:
-            print(f"We found a password for {username}")
+            print(f"We found a password for {username}.")
+        else:
+            print("We failed to collect username and password.")
 
 
 def main() -> None:

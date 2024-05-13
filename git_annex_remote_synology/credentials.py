@@ -28,8 +28,6 @@ class Credentials:
         self._connection: Connection = None
         self._cursor: Cursor = None
 
-        self._debug("End of Credentials init.")
-
     @property
     def hostname(self) -> str:
         return self._hostname
@@ -42,7 +40,12 @@ class Credentials:
             username = self._prompt_username()
             self.username = username
 
-        self._debug(f'Successfully returned username "{username}".')
+        if username:
+            self._debug(f'Successfully returned username "{username}".')
+        else:
+            self._debug(f"Username was not returned successfully.")
+            raise RemoteError("Username cannot be null.")
+
         return username
 
     @username.setter
@@ -54,11 +57,20 @@ class Credentials:
 
     @property
     def password(self) -> str:
+        self._debug("Starting get password.")
         password = self._get_password()
+        self._debug("Finished get password.")
 
         if not password:
+            self._debug("Starting password prompt.")
             password = self._prompt_password()
             self.password = password
+
+        if password:
+            self._debug("Successfully returned password.")
+        else:
+            self._debug("Password was not returned successfully.")
+            raise RemoteError("Password cannot be null.")
 
         return password
 
@@ -73,7 +85,10 @@ class Credentials:
 
     @property
     def totp_command(self) -> str:
-        return self._get_totp_command()
+        totp_command = self._get_totp_command()
+        self._annex.debug(f'TOTP Command: "{totp_command}".')
+
+        return totp_command
 
     @totp_command.setter
     def totp_command(self, totp_command: str):
@@ -90,6 +105,8 @@ class Credentials:
                 shlex.split(self.totp_command), stdout=PIPE
             )
             totp = totp_result.stdout.decode("utf8")
+
+        self._annex.debug(f"TOTP: {totp}")
 
         return totp
 

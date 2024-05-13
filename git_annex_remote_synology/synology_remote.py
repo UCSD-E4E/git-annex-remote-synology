@@ -113,6 +113,16 @@ class SynologyRemote(SpecialRemote):
                 with Credentials(
                     self.hostname, headless=True, annex=self.annex
                 ) as creds:
+                    if not creds.username or not creds.password:
+                        self.annex.debug("Username or password was not retrieved.")
+                        raise RemoteError("Username or password was not retrieved.")
+                    else:
+                        self.annex.debug(
+                            f'Found username: "{creds.username}" and password.'
+                        )
+
+                    self.annex.debug(f'TOTP Command: "{creds.totp_command}".')
+
                     filestation = FileStation(
                         self.hostname,
                         self.port,
@@ -128,6 +138,7 @@ class SynologyRemote(SpecialRemote):
                     self._filestation = filestation
             except Exception as ex:
                 self.annex.debug(f'Exception "{ex}" occurred while trying to auth.')
+
                 raise RemoteError(
                     f"Authentication to {self.hostname}:{self.port} failed."
                 )
