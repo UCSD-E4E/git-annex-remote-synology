@@ -1,5 +1,5 @@
 # git-annex special remote for Synology NAS
-This provides a (special remote)[https://git-annex.branchable.com/special_remotes/web/] for `git annex` for storage on a Synology NAS.
+This provides a [special remote](https://git-annex.branchable.com/special_remotes/web/) for `git annex` for storage on a Synology NAS.
 
 ## Installation
 ```
