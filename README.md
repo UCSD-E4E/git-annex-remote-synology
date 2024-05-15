@@ -1,4 +1,5 @@
 # git-annex special remote for Synology NAS
+This provides a (special remote)[https://git-annex.branchable.com/special_remotes/web/] for `git annex` for storage on a Synology NAS.
 
 ## Installation
 ```
@@ -7,8 +8,10 @@ pipx install git+https://github.com/UCSD-E4E/git-annex-remote-synology.git
 
 ## Upgrade
 ```
-pipx upgrade git-annex-remote-synology
+pipx uninstall git-annex-remote-synology
+pipx install git+https://github.com/UCSD-E4E/git-annex-remote-synology.git
 ```
+Using the `pipx upgrade` command is not currently supported since the repo does not have a version increment yet.
 
 ## Usage
 1. Create a git-annex repository (walkthrough)
