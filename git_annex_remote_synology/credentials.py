@@ -72,9 +72,8 @@ class Credentials:  # pylint: disable=too-many-instance-attributes
 
     @username.setter
     def username(self, username: str):
-        self._save_username(username, self.totp_command)
-
         self._username = username
+        self._save_username(username, self.totp_command)
 
     @property
     def password(self) -> str:
