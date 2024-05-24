@@ -198,6 +198,8 @@ class Credentials:  # pylint: disable=too-many-instance-attributes
 
         if username:
             self.username = username
+        elif self._username:
+            return self._username
         else:
             result = self._cursor.execute(
                 "SELECT username FROM users WHERE hostname = ?", (self.hostname,)
