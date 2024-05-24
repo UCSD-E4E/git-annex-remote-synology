@@ -131,7 +131,7 @@ class Credentials:  # pylint: disable=too-many-instance-attributes
 
     @totp_command.setter
     def totp_command(self, totp_command: str):
-        self._save_username(self.username, totp_command)
+        self._save_username(self._username or self.username, totp_command)
 
         self._totp_command = totp_command
 
@@ -198,8 +198,6 @@ class Credentials:  # pylint: disable=too-many-instance-attributes
 
         if username:
             self.username = username
-        elif self._username:
-            return self._username
         else:
             result = self._cursor.execute(
                 "SELECT username FROM users WHERE hostname = ?", (self.hostname,)
