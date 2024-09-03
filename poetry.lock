@@ -603,20 +603,6 @@ socks = ["PySocks (>=1.5.6,!=1.5.7)"]
 use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
-name = "requests-toolbelt"
-version = "1.0.0"
-description = "A utility belt for advanced users of python-requests"
-optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-files = [
-    {file = "requests-toolbelt-1.0.0.tar.gz", hash = "sha256:7681a0a3d047012b5bdc0ee37d7f8f07ebe76ab08caeccfc3921ce23c88d5bc6"},
-    {file = "requests_toolbelt-1.0.0-py2.py3-none-any.whl", hash = "sha256:cccfdd665f0a24fcf4726e690f65639d272bb0637b9b92dfd91a5568ccf6bd06"},
-]
-
-[package.dependencies]
-requests = ">=2.0.1,<3.0.0"
-
-[[package]]
 name = "secretstorage"
 version = "3.3.3"
 description = "Python bindings to FreeDesktop.org Secret Service API"
@@ -653,25 +639,19 @@ type = ["importlib-metadata (>=7.0.2)", "jaraco.develop (>=7.21)", "mypy (==1.11
 
 [[package]]
 name = "synology-api"
-version = "0.7.3"
+version = "0.7.2"
 description = "Python Synology API Wrapper"
 optional = false
 python-versions = "*"
-files = []
-develop = false
+files = [
+    {file = "synology-api-0.7.2.tar.gz", hash = "sha256:e80c92036727d594198a54475c030dac0a9e8737369a0e09effca41b577f3a37"},
+    {file = "synology_api-0.7.2-py3-none-any.whl", hash = "sha256:a957131007f99b1401a5bf0cf7061e64582a9254ab3cff1a73ec6a28e2d7ec4f"},
+]
 
 [package.dependencies]
 requests = "*"
-requests_toolbelt = "*"
 setuptools = "*"
-tqdm = "*"
 urllib3 = "*"
-
-[package.source]
-type = "git"
-url = "https://github.com/ccrutchf/synology-api.git"
-reference = "HEAD"
-resolved_reference = "0a55f58ee3a6bca1c8545875fc0455eeacc972e6"
 
 [[package]]
 name = "tomli"
@@ -765,4 +745,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "ba469d1b71ed858ff6bc90019e67538a4fecad9590a1091be699f55f58a2c8ac"
+content-hash = "69cb7fbbca43dd05dc5c6e012a14a14ac80b3f9ec93fbda79a795386b1f50194"
